@@ -4,16 +4,20 @@
     <title>Parcel Sandbox</title>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="src/styles.css" />
+    <script src="src/index.js" type="module" ></script>
   </head>
 
   <body>
+    
     <div id="app">
       <div class="render-loop">
         <input type="checkbox" name="render-loop" />
         <a>enable render loop</a>
       </div>
-      <canvas id="canvas"></canvas>
-    </div>
-    <script src="src/index.js"></script>
+      <canvas id = "canvas" style="width: 100%; height: auto;"></canvas>
+      <test-element></test-element>
+     </div> 
+     
   </body>
+  <!-- <script src="src/canvas.js"></script> -->
 </html>
