@@ -470,7 +470,7 @@ d.finalized = !0, d.elementProperties = new Map(), d.elementStyles = [], d.shado
   mode: "open"
 }, null == o || o({
   ReactiveElement: d
-}), (null !== (s = e.reactiveElementVersions) && void 0 !== s ? s : e.reactiveElementVersions = []).push("1.5.0");
+}), (null !== (s = e.reactiveElementVersions) && void 0 !== s ? s : e.reactiveElementVersions = []).push("1.6.0");
 },{"./css-tag.js":"node_modules/@lit/reactive-element/css-tag.js"}],"node_modules/lit-html/lit-html.js":[function(require,module,exports) {
 "use strict";
 
@@ -810,7 +810,7 @@ const L = {
   },
   z = i.litHtmlPolyfillSupport;
 exports._$LH = L;
-null == z || z(C, N), (null !== (t = i.litHtmlVersions) && void 0 !== t ? t : i.litHtmlVersions = []).push("2.5.0");
+null == z || z(C, N), (null !== (t = i.litHtmlVersions) && void 0 !== t ? t : i.litHtmlVersions = []).push("2.6.0");
 const Z = (t, i, s) => {
   var e, o;
   const n = null !== (e = null == s ? void 0 : s.renderBefore) && void 0 !== e ? e : i;
@@ -990,10 +990,14 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
     _this.temp_buffer = [{}];
     _this.buffer_count = 0;
     // this.renderLoop = !this.renderLoop;
-    _this.draw();
     return _this;
   }
   _createClass(MyElement, [{
+    key: "firstUpdated",
+    value: function firstUpdated() {
+      this.draw();
+    }
+  }, {
     key: "_createRects",
     value: function _createRects(numRects, buffer_json) {
       this.buffer_count++;
@@ -1093,7 +1097,7 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       var _this2 = this;
       var time = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Math.random();
       var cursor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Math.random();
-      var canvas = document.getElementById('canvas');
+      var canvas = this.shadowRoot.querySelector('#canvas');
       console.log(canvas);
       var gl = canvas.getContext("webgl");
       var vertices = this._createRects(this.signal, this.buffer_json);
@@ -1198,7 +1202,7 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
   }, {
     key: "render",
     value: function render() {
-      return (0, _lit.html)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n    \n      Web Components are !\n      <button @click=\"", "\">Click</button>\n    "])), this.clickHandler);
+      return (0, _lit.html)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n    \n      Web Components are !\n      <button @click=\"", "\">Click</button>\n      <canvas id = \"canvas\" style=\"width: 100%; height: 100%;\"></canvas>\n      \n      "])), this.clickHandler);
     }
   }, {
     key: "clickHandler",
@@ -1254,7 +1258,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49696" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59785" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
