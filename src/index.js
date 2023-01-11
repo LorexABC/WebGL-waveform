@@ -1,11 +1,13 @@
-
-import { html, LitElement, property, query } from 'lit';
+import Stats from "stats.js";
+import { html, LitElement, property, query_Selector } from 'lit';
 
 export class MyElement extends LitElement {
   constructor() {
     super();
     this.renderLoop = true;
     this.buffer_json = [{}];
+    this.temp_buffer = [{}];
+    this.buffer_count = 0;
     // this.renderLoop = !this.renderLoop;
     this.draw();
   }
@@ -14,31 +16,75 @@ export class MyElement extends LitElement {
     return {
       depth: {type: Number},
       signal : {type: Number},
-      during : {type: Number},
+  
       x : {type : Number},
       buffer_json : {type : Array}
     }
   }
 
   _createRects(numRects, buffer_json) {
-    const width = 2 / 100;
+    this.buffer_count ++;
+
+    
+    const width = 2 / numRects;
     const rects = [];
     let x = this.x;
-    // console.log(this.buffer_json.length);
-    for (let i = 0; i < this.buffer_json.length; i++) {
-      const y = buffer_json.at(i);
-      
+    for (let i = 0; i < this.buffer_count; i++) {
+      const y = buffer_json.at(i) / 65355;
+      if (this.depth < 32678)
+      {
+        var temp = 0;
+        console.log((((32678-this.depth) / 65355) ) + "========" + this.depth );
+        if(y > (((32678-this.depth) / 65355) )){
+          temp = -(this.depth / 65355);
+        } else {
+          temp = -y;
+        }
+
+        rects.push(
+          // 1st triangle
+          x, y ,0,
+          x,temp ,0,
+          x+width, y ,0,
+          // x+width, -2 ,0,
+          // // 2nd triangle
+          x,temp , 0,
+          x+width, y  ,0,
+          x+width,temp  ,0,
+        );  
+      }
+      else{
+       
+        if(y < (this.depth / 65355/2)){
+          x+= width;
+          continue;
+          
+        }
+          
+        var temp = (this.depth / 65355/2);
+        console.log(temp + "=========" + y);
+        rects.push(
+          // 1st triangle
+          x,temp ,0,
+          x,y ,0,
+          x+width,temp ,0,
+          // 2nd triangle
+          x,y , 0,
+          x+width,y ,0,
+          x+width,temp  ,0,
+        );  
+      }
       // prettier-ignore
-      rects.push(
-        // 1st triangle
-        x,y,0,
-        x,-y,0,
-        x+width,y,0,
-        // 2nd triangle
-        x,-y,0,
-        x+width,y,0,
-        x+width,-y,0,
-      );
+      // rects.push(
+      //   // 1st triangle
+        // x,y ,0,
+        // x,-y ,0,
+        // x+width,y ,0,
+        // // 2nd triangle
+        // x,-y , 0,
+        // x+width,y ,0,
+        // x+width,-y  ,0,
+      // );
       x += width;
     }
     return rects;
@@ -49,19 +95,52 @@ export class MyElement extends LitElement {
     let x = this.x;
     // console.log(this.buffer_json.length);
     for (let i = 0; i < numRects; i++) {
-      const y = Math.random();
+      var y = Math.random();
       
-      // prettier-ignore
-      rects.push(
-        // 1st triangle
-        x,y,0,
-        x,-y,0,
-        x+width,y,0,
-        // 2nd triangle
-        x,-y,0,
-        x+width,y,0,
-        x+width,-y,0,
-      );
+      if (this.depth < (65355 /2))
+      {
+        var temp = 0;
+        if(y > 0.5){
+          temp = -0.2;
+        } else {
+          temp = -y;
+        }
+
+        // console.log(temp);
+        rects.push(
+          // 1st triangle
+          x, y ,0,
+          x,temp ,0,
+          x+width, y ,0,
+          // x+width, -2 ,0,
+          // // 2nd triangle
+          x,temp , 0,
+          x+width, y  ,0,
+          x+width,temp  ,0,
+        );  
+      }
+      else{
+        var temp = 0.9;
+        
+        if(y < 0.9){
+          x += width;
+          continue;
+        }
+          
+        // console.log(temp);
+        rects.push(
+          // 1st triangle
+          x, temp ,0,
+          x,y ,0,
+          x+width, temp ,0,
+          // x+width, -2 ,0,
+          // // 2nd triangle
+          x,y , 0,
+          x+width, temp  ,0,
+          x+width,y  ,0,
+        );  
+      }
+      
       x += width;
     }
     return rects;
@@ -69,24 +148,22 @@ export class MyElement extends LitElement {
 
 
   draw(time = Math.random(), cursor = Math.random()) {
-    console.log(this.buffer_json);
-    const canvas = document.getElementById("canvas");
+
+    const canvas = document.getElementById('canvas');
+    console.log(canvas);
     const gl = canvas.getContext("webgl");
-    const shaderProgram = gl.createProgram();
-    // const uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
-    // const uCursorLoc = gl.getUniformLocation(shaderProgram, "u_cursor");
+
     const vertices = this._createRects(this.signal, this.buffer_json);
     // const vertices = this._createRects_random(this.signal);
     
     const vertex_buffer = gl.createBuffer();
     // Bind appropriate array buffer to it
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-
     // Pass the vertex data to the buffer
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
     // Unbind the buffer
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     /*=================== Shaders ====================*/
 
@@ -124,7 +201,7 @@ export class MyElement extends LitElement {
     gl.compileShader(vertShader);
 
     // Fragment shader source code
-    const fragCode = "void main(void) {gl_FragColor = vec4(0.1,0.1,0.1,1);}";
+    const fragCode = "void main(void) {gl_FragColor = vec4(0.5,0.5,0.5,1);}";
 
     // Create fragment shader object
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -135,6 +212,7 @@ export class MyElement extends LitElement {
     // Compile the fragmentt shader
     gl.compileShader(fragShader);
 
+    const shaderProgram = gl.createProgram();
     // Attach a vertex shader
     gl.attachShader(shaderProgram, vertShader);
 
@@ -152,7 +230,9 @@ export class MyElement extends LitElement {
     // Bind vertex buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 
+    // const uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
     // gl.uniform1f(uTimeLoc, Math.random());
+    // const uCursorLoc = gl.getUniformLocation(shaderProgram, "u_cursor");
     // gl.uniform1f(uCursorLoc, Math.random());
 
     // Get the attribute location
@@ -169,24 +249,38 @@ export class MyElement extends LitElement {
     // Enable the depth test
     gl.enable(gl.DEPTH_TEST);
 
-    gl.clearColor(255, 255, 255, 1);
+    gl.clearColor(0, 0, 0, 1);
 
     // Set the view port
-    gl.viewport(0, canvas.height/2 - this.depth/2 , canvas.width, this.depth );
+    gl.viewport(0, 0 , canvas.width, canvas.height );
 
+    // var stats = new Stats();
+    // stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    // document.body.appendChild(stats.dom);
+
+    // console.log(gl.ARRAY_BUFFER);
+    // stats.begin();
     
-    // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // gl.uniform1f(uTimeLoc, 1 / time);
     // gl.uniform1f(uCursorLoc, 1 / cursor);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length/3 );
+    gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
     // stats.end();
-    if (this.renderLoop) requestAnimationFrame(() => this.draw());
+    if (this.renderLoop && this.buffer_count <= this.buffer_json.length){
+        setTimeout(() => {
+          requestAnimationFrame(() => this.draw());
+        }, 100);
+        
+        
+    }
+    // if (this.renderLoop) requestAnimationFrame(() => this.draw());
   }
 
 
   
   render() {  
     return html`
+    
       Web Components are !
       <button @click="${this.clickHandler}">Click</button>
     `;
@@ -203,4 +297,4 @@ export class MyElement extends LitElement {
 
 
 
-customElements.define('test-element', MyElement)
+customElements.define('webgl-waveform', MyElement)

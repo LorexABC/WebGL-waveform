@@ -117,7 +117,15 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"node_modules/@lit/reactive-element/css-tag.js":[function(require,module,exports) {
+})({"node_modules/stats.js/build/stats.min.js":[function(require,module,exports) {
+var define;
+// stats.js - http://github.com/mrdoob/stats.js
+(function(f,e){"object"===typeof exports&&"undefined"!==typeof module?module.exports=e():"function"===typeof define&&define.amd?define(e):f.Stats=e()})(this,function(){var f=function(){function e(a){c.appendChild(a.dom);return a}function u(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();
+u(++l%c.children.length)},!1);var k=(performance||Date).now(),g=k,a=0,r=e(new f.Panel("FPS","#0ff","#002")),h=e(new f.Panel("MS","#0f0","#020"));if(self.performance&&self.performance.memory)var t=e(new f.Panel("MB","#f08","#201"));u(0);return{REVISION:16,dom:c,addPanel:e,showPanel:u,begin:function(){k=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();h.update(c-k,200);if(c>g+1E3&&(r.update(1E3*a/(c-g),100),g=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/
+1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){k=this.end()},domElement:c,setMode:u}};f.Panel=function(e,f,l){var c=Infinity,k=0,g=Math.round,a=g(window.devicePixelRatio||1),r=80*a,h=48*a,t=3*a,v=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=h;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,h);b.fillStyle=f;b.fillText(e,t,v);
+b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(h,w){c=Math.min(c,h);k=Math.max(k,h);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=f;b.fillText(g(h)+" "+e+" ("+g(c)+"-"+g(k)+")",t,v);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,g((1-h/w)*p))}}};return f});
+
+},{}],"node_modules/@lit/reactive-element/css-tag.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -952,8 +960,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.MyElement = void 0;
+var _stats = _interopRequireDefault(require("stats.js"));
 var _lit = require("lit");
 var _templateObject;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -977,6 +987,8 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
     _this = _super.call(this);
     _this.renderLoop = true;
     _this.buffer_json = [{}];
+    _this.temp_buffer = [{}];
+    _this.buffer_count = 0;
     // this.renderLoop = !this.renderLoop;
     _this.draw();
     return _this;
@@ -984,19 +996,50 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
   _createClass(MyElement, [{
     key: "_createRects",
     value: function _createRects(numRects, buffer_json) {
-      var width = 2 / 100;
+      this.buffer_count++;
+      var width = 2 / numRects;
       var rects = [];
       var x = this.x;
-      // console.log(this.buffer_json.length);
-      for (var i = 0; i < this.buffer_json.length; i++) {
-        var y = buffer_json.at(i);
-
+      for (var i = 0; i < this.buffer_count; i++) {
+        var y = buffer_json.at(i) / 65355;
+        if (this.depth < 32678) {
+          var temp = 0;
+          console.log((32678 - this.depth) / 65355 + "========" + this.depth);
+          if (y > (32678 - this.depth) / 65355) {
+            temp = -(this.depth / 65355);
+          } else {
+            temp = -y;
+          }
+          rects.push(
+          // 1st triangle
+          x, y, 0, x, temp, 0, x + width, y, 0,
+          // x+width, -2 ,0,
+          // // 2nd triangle
+          x, temp, 0, x + width, y, 0, x + width, temp, 0);
+        } else {
+          if (y < this.depth / 65355 / 2) {
+            x += width;
+            continue;
+          }
+          var temp = this.depth / 65355 / 2;
+          console.log(temp + "=========" + y);
+          rects.push(
+          // 1st triangle
+          x, temp, 0, x, y, 0, x + width, temp, 0,
+          // 2nd triangle
+          x, y, 0, x + width, y, 0, x + width, temp, 0);
+        }
         // prettier-ignore
-        rects.push(
-        // 1st triangle
-        x, y, 0, x, -y, 0, x + width, y, 0,
-        // 2nd triangle
-        x, -y, 0, x + width, y, 0, x + width, -y, 0);
+        // rects.push(
+        //   // 1st triangle
+        // x,y ,0,
+        // x,-y ,0,
+        // x+width,y ,0,
+        // // 2nd triangle
+        // x,-y , 0,
+        // x+width,y ,0,
+        // x+width,-y  ,0,
+        // );
         x += width;
       }
       return rects;
@@ -1010,13 +1053,36 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       // console.log(this.buffer_json.length);
       for (var i = 0; i < numRects; i++) {
         var y = Math.random();
+        if (this.depth < 65355 / 2) {
+          var temp = 0;
+          if (y > 0.5) {
+            temp = -0.2;
+          } else {
+            temp = -y;
+          }
 
-        // prettier-ignore
-        rects.push(
-        // 1st triangle
-        x, y, 0, x, -y, 0, x + width, y, 0,
-        // 2nd triangle
-        x, -y, 0, x + width, y, 0, x + width, -y, 0);
+          // console.log(temp);
+          rects.push(
+          // 1st triangle
+          x, y, 0, x, temp, 0, x + width, y, 0,
+          // x+width, -2 ,0,
+          // // 2nd triangle
+          x, temp, 0, x + width, y, 0, x + width, temp, 0);
+        } else {
+          var temp = 0.9;
+          if (y < 0.9) {
+            x += width;
+            continue;
+          }
+
+          // console.log(temp);
+          rects.push(
+          // 1st triangle
+          x, temp, 0, x, y, 0, x + width, temp, 0,
+          // x+width, -2 ,0,
+          // // 2nd triangle
+          x, y, 0, x + width, temp, 0, x + width, y, 0);
+        }
         x += width;
       }
       return rects;
@@ -1027,24 +1093,20 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       var _this2 = this;
       var time = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Math.random();
       var cursor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Math.random();
-      console.log(this.buffer_json);
-      var canvas = document.getElementById("canvas");
+      var canvas = document.getElementById('canvas');
+      console.log(canvas);
       var gl = canvas.getContext("webgl");
-      var shaderProgram = gl.createProgram();
-      // const uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
-      // const uCursorLoc = gl.getUniformLocation(shaderProgram, "u_cursor");
       var vertices = this._createRects(this.signal, this.buffer_json);
       // const vertices = this._createRects_random(this.signal);
 
       var vertex_buffer = gl.createBuffer();
       // Bind appropriate array buffer to it
       gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-
       // Pass the vertex data to the buffer
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
       // Unbind the buffer
-      // gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
       /*=================== Shaders ====================*/
 
@@ -1061,7 +1123,7 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       gl.compileShader(vertShader);
 
       // Fragment shader source code
-      var fragCode = "void main(void) {gl_FragColor = vec4(0.1,0.1,0.1,1);}";
+      var fragCode = "void main(void) {gl_FragColor = vec4(0.5,0.5,0.5,1);}";
 
       // Create fragment shader object
       var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -1071,7 +1133,7 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
 
       // Compile the fragmentt shader
       gl.compileShader(fragShader);
-
+      var shaderProgram = gl.createProgram();
       // Attach a vertex shader
       gl.attachShader(shaderProgram, vertShader);
 
@@ -1089,7 +1151,9 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       // Bind vertex buffer object
       gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 
+      // const uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
       // gl.uniform1f(uTimeLoc, Math.random());
+      // const uCursorLoc = gl.getUniformLocation(shaderProgram, "u_cursor");
       // gl.uniform1f(uCursorLoc, Math.random());
 
       // Get the attribute location
@@ -1105,24 +1169,36 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
 
       // Enable the depth test
       gl.enable(gl.DEPTH_TEST);
-      gl.clearColor(255, 255, 255, 1);
+      gl.clearColor(0, 0, 0, 1);
 
       // Set the view port
-      gl.viewport(0, canvas.height / 2 - this.depth / 2, canvas.width, this.depth);
+      gl.viewport(0, 0, canvas.width, canvas.height);
 
-      // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      // var stats = new Stats();
+      // stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+      // document.body.appendChild(stats.dom);
+
+      // console.log(gl.ARRAY_BUFFER);
+      // stats.begin();
+
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       // gl.uniform1f(uTimeLoc, 1 / time);
       // gl.uniform1f(uCursorLoc, 1 / cursor);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length / 3);
+      gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
       // stats.end();
-      if (this.renderLoop) requestAnimationFrame(function () {
-        return _this2.draw();
-      });
+      if (this.renderLoop && this.buffer_count <= this.buffer_json.length) {
+        setTimeout(function () {
+          requestAnimationFrame(function () {
+            return _this2.draw();
+          });
+        }, 100);
+      }
+      // if (this.renderLoop) requestAnimationFrame(() => this.draw());
     }
   }, {
     key: "render",
     value: function render() {
-      return (0, _lit.html)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n      Web Components are !\n      <button @click=\"", "\">Click</button>\n    "])), this.clickHandler);
+      return (0, _lit.html)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n    \n      Web Components are !\n      <button @click=\"", "\">Click</button>\n    "])), this.clickHandler);
     }
   }, {
     key: "clickHandler",
@@ -1140,9 +1216,6 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
         signal: {
           type: Number
         },
-        during: {
-          type: Number
-        },
         x: {
           type: Number
         },
@@ -1155,8 +1228,8 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
   return MyElement;
 }(_lit.LitElement);
 exports.MyElement = MyElement;
-customElements.define('test-element', MyElement);
-},{"lit":"node_modules/lit/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+customElements.define('webgl-waveform', MyElement);
+},{"stats.js":"node_modules/stats.js/build/stats.min.js","lit":"node_modules/lit/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1181,7 +1254,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56884" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49696" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
