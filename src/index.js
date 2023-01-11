@@ -9,14 +9,23 @@ export class MyElement extends LitElement {
     this.temp_buffer = [{}];
     this.buffer_count = 0;
     // this.renderLoop = !this.renderLoop;
+    
+  }
+
+  firstUpdated(){
     this.draw();
+  }
+
+  updateBuffer(sampleArr){
+      console.log("buffer updating..");
+      // TODO add code to manage display
   }
 
   static get properties(){
     return {
       depth: {type: Number},
       signal : {type: Number},
-  
+      sampleRate : {type: Number},
       x : {type : Number},
       buffer_json : {type : Array}
     }
@@ -149,7 +158,7 @@ export class MyElement extends LitElement {
 
   draw(time = Math.random(), cursor = Math.random()) {
 
-    const canvas = document.getElementById('canvas');
+    const canvas = this.shadowRoot.querySelector('#canvas')
     console.log(canvas);
     const gl = canvas.getContext("webgl");
 
@@ -283,7 +292,9 @@ export class MyElement extends LitElement {
     
       Web Components are !
       <button @click="${this.clickHandler}">Click</button>
-    `;
+      <canvas id = "canvas" style="width: 100%; height: 100%;"></canvas>
+      
+      `;
 
   }
 
