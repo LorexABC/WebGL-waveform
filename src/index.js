@@ -16,11 +16,16 @@ export class MyElement extends LitElement {
     this.draw();
   }
 
+  updateBuffer(sampleArr){
+      console.log("buffer updating..");
+      // TODO add code to manage display
+  }
+
   static get properties(){
     return {
       depth: {type: Number},
       signal : {type: Number},
-  
+      sampleRate : {type: Number},
       x : {type : Number},
       buffer_json : {type : Array}
     }

@@ -998,6 +998,12 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       this.draw();
     }
   }, {
+    key: "updateBuffer",
+    value: function updateBuffer(sampleArr) {
+      console.log("buffer updating..");
+      // TODO add code to manage display
+    }
+  }, {
     key: "_createRects",
     value: function _createRects(numRects, buffer_json) {
       this.buffer_count++;
@@ -1220,6 +1226,9 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
         signal: {
           type: Number
         },
+        sampleRate: {
+          type: Number
+        },
         x: {
           type: Number
         },
@@ -1258,7 +1267,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59785" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62999" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
