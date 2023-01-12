@@ -995,114 +995,6 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
   _createClass(MyElement, [{
     key: "firstUpdated",
     value: function firstUpdated() {
-      this.draw();
-    }
-  }, {
-    key: "updateBuffer",
-    value: function updateBuffer(sampleArr) {
-      console.log("buffer updating..");
-      // TODO add code to manage display
-    }
-  }, {
-    key: "_createRects",
-    value: function _createRects(numRects, buffer_json) {
-      this.buffer_count++;
-      var width = 2 / numRects;
-      var rects = [];
-      var x = this.x;
-      for (var i = 0; i < this.buffer_count; i++) {
-        var y = buffer_json.at(i) / 65355;
-        if (this.depth < 32678) {
-          var temp = 0;
-          console.log((32678 - this.depth) / 65355 + "========" + this.depth);
-          if (y > (32678 - this.depth) / 65355) {
-            temp = -(this.depth / 65355);
-          } else {
-            temp = -y;
-          }
-          rects.push(
-          // 1st triangle
-          x, y, 0, x, temp, 0, x + width, y, 0,
-          // x+width, -2 ,0,
-          // // 2nd triangle
-          x, temp, 0, x + width, y, 0, x + width, temp, 0);
-        } else {
-          if (y < this.depth / 65355 / 2) {
-            x += width;
-            continue;
-          }
-          var temp = this.depth / 65355 / 2;
-          console.log(temp + "=========" + y);
-          rects.push(
-          // 1st triangle
-          x, temp, 0, x, y, 0, x + width, temp, 0,
-          // 2nd triangle
-          x, y, 0, x + width, y, 0, x + width, temp, 0);
-        }
-        // prettier-ignore
-        // rects.push(
-        //   // 1st triangle
-        // x,y ,0,
-        // x,-y ,0,
-        // x+width,y ,0,
-        // // 2nd triangle
-        // x,-y , 0,
-        // x+width,y ,0,
-        // x+width,-y  ,0,
-        // );
-        x += width;
-      }
-      return rects;
-    }
-  }, {
-    key: "_createRects_random",
-    value: function _createRects_random(numRects) {
-      var width = 2 / numRects;
-      var rects = [];
-      var x = this.x;
-      // console.log(this.buffer_json.length);
-      for (var i = 0; i < numRects; i++) {
-        var y = Math.random();
-        if (this.depth < 65355 / 2) {
-          var temp = 0;
-          if (y > 0.5) {
-            temp = -0.2;
-          } else {
-            temp = -y;
-          }
-
-          // console.log(temp);
-          rects.push(
-          // 1st triangle
-          x, y, 0, x, temp, 0, x + width, y, 0,
-          // x+width, -2 ,0,
-          // // 2nd triangle
-          x, temp, 0, x + width, y, 0, x + width, temp, 0);
-        } else {
-          var temp = 0.9;
-          if (y < 0.9) {
-            x += width;
-            continue;
-          }
-
-          // console.log(temp);
-          rects.push(
-          // 1st triangle
-          x, temp, 0, x, y, 0, x + width, temp, 0,
-          // x+width, -2 ,0,
-          // // 2nd triangle
-          x, y, 0, x + width, temp, 0, x + width, y, 0);
-        }
-        x += width;
-      }
-      return rects;
-    }
-  }, {
-    key: "draw",
-    value: function draw() {
-      var _this2 = this;
-      var time = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Math.random();
-      var cursor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Math.random();
       var canvas = this.shadowRoot.querySelector('#canvas');
       console.log(canvas);
       var gl = canvas.getContext("webgl");
@@ -1160,9 +1052,8 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
 
       // Bind vertex buffer object
       gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-
-      // const uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
-      // gl.uniform1f(uTimeLoc, Math.random());
+      var uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
+      gl.uniform1f(uTimeLoc, Math.random());
       // const uCursorLoc = gl.getUniformLocation(shaderProgram, "u_cursor");
       // gl.uniform1f(uCursorLoc, Math.random());
 
@@ -1183,32 +1074,156 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
 
       // Set the view port
       gl.viewport(0, 0, canvas.width, canvas.height);
+      this.draw(gl, vertices, uTimeLoc);
+    }
+  }, {
+    key: "updateBuffer",
+    value: function updateBuffer(sampleArr) {
+      console.log("buffer updating..");
 
-      // var stats = new Stats();
-      // stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-      // document.body.appendChild(stats.dom);
+      // TODO add code to manage display
+    }
+  }, {
+    key: "_createRects",
+    value: function _createRects(numRects, buffer_json) {
+      this.buffer_count++;
+      var width = 2 / numRects;
+      var rects = [];
+      var x = this.x;
+      for (var i = 0; i < this.buffer_count; i++) {
+        var y = buffer_json.at(i) / Math.pow(2, this.depth);
+        if (this.depth < Math.pow(2, this.depth) / 2) {
+          var temp = 0;
+          console.log((Math.pow(2, this.depth) / 2 - this.depth) / Math.pow(2, this.depth) + "========" + this.depth);
+          if (y > (Math.pow(2, this.depth) / 2 - this.depth) / Math.pow(2, this.depth)) {
+            temp = -(this.depth / Math.pow(2, this.depth));
+          } else {
+            temp = -y;
+          }
+          rects.push(
+          // 1st triangle
+          x, y, 0, x, temp, 0
+          // x+width, y ,0,
+          // // x+width, -2 ,0,
+          // // // 2nd triangle
+          // x,temp , 0,
+          // x+width, y  ,0,
+          // x+width,temp  ,0,
+          );
+        } else {
+          if (y < this.depth / Math.pow(2, this.depth) / 2) {
+            x += width;
+            continue;
+          }
+          var temp = this.depth / Math.pow(2, this.depth) / 2;
+          console.log(temp + "=========" + y);
+          rects.push(
+          // 1st triangle
+          x, temp, 0, x, y, 0
+          // x+width,temp ,0,
+          // 2nd triangle
+          // x,y , 0,
+          // x+width,y ,0,
+          // x+width,temp  ,0,
+          );
+        }
+        // prettier-ignore
+        // rects.push(
+        //   // 1st triangle
+        // x,y ,0,
+        // x,-y ,0,
+        // x+width,y ,0,
+        // // 2nd triangle
+        // x,-y , 0,
+        // x+width,y ,0,
+        // x+width,-y  ,0,
+        // );
+        x += width;
+      }
+      return rects;
+    }
+    // _createRects_random(numRects ) {
+    //   const width = 2 / numRects;
+    //   const rects = [];
+    //   let x = this.x;
+    //   // console.log(this.buffer_json.length);
+    //   for (let i = 0; i < numRects; i++) {
+    //     var y = Math.random();
 
+    //     if (this.depth < (65355 /2))
+    //     {
+    //       var temp = 0;
+    //       if(y > 0.5){
+    //         temp = -0.2;
+    //       } else {
+    //         temp = -y;
+    //       }
+
+    //       // console.log(temp);
+    //       rects.push(
+    //         // 1st triangle
+    //         x, y ,0,
+    //         x,temp ,0,
+    //         x+width, y ,0,
+    //         // x+width, -2 ,0,
+    //         // // 2nd triangle
+    //         x,temp , 0,
+    //         x+width, y  ,0,
+    //         x+width,temp  ,0,
+    //       );  
+    //     }
+    //     else{
+    //       var temp = 0.9;
+
+    //       if(y < 0.9){
+    //         x += width;
+    //         continue;
+    //       }
+
+    //       // console.log(temp);
+    //       rects.push(
+    //         // 1st triangle
+    //         x, temp ,0,
+    //         x,y ,0,
+    //         x+width, temp ,0,
+    //         // x+width, -2 ,0,
+    //         // // 2nd triangle
+    //         x,y , 0,
+    //         x+width, temp  ,0,
+    //         x+width,y  ,0,
+    //       );  
+    //     }
+
+    //     x += width;
+    //   }
+    //   return rects;
+    // }
+  }, {
+    key: "draw",
+    value: function draw(gl, vertices, uTimeLoc) {
+      var _this2 = this;
       // console.log(gl.ARRAY_BUFFER);
       // stats.begin();
-
+      var time = Math.random();
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      // gl.uniform1f(uTimeLoc, 1 / time);
+      gl.uniform1f(uTimeLoc, 1 / time);
       // gl.uniform1f(uCursorLoc, 1 / cursor);
-      gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
+      console.log("gl---------------" + gl);
+      gl.drawArrays(gl.LINES, 0, vertices.length);
       // stats.end();
-      if (this.renderLoop && this.buffer_count <= this.buffer_json.length) {
-        setTimeout(function () {
-          requestAnimationFrame(function () {
-            return _this2.draw();
-          });
-        }, 100);
-      }
-      // if (this.renderLoop) requestAnimationFrame(() => this.draw());
+      // if (this.renderLoop && this.buffer_count <= this.buffer_json.length){
+      //     setTimeout(() => {
+      //       requestAnimationFrame(() => this.draw());
+      //     }, 10);
+      // }
+      if (this.renderLoop) requestAnimationFrame(function () {
+        return _this2.draw(gl, vertices, uTimeLoc);
+      });
     }
   }, {
     key: "render",
     value: function render() {
-      return (0, _lit.html)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n    \n      Web Components are !\n      <button @click=\"", "\">Click</button>\n      <canvas id = \"canvas\" style=\"width: 100%; height: 100%;\"></canvas>\n      \n      "])), this.clickHandler);
+      return (0, _lit.html)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n    \n      Web Components are !\n      <button @click=\"", "\">Click</button>\n      <canvas id = \"canvas\" style=\"width: 100%; height: 100%;\"  ></canvas>\n      \n      "])), this.clickHandler);
     }
   }, {
     key: "clickHandler",
@@ -1267,7 +1282,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62999" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "18843" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
