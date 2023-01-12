@@ -120,14 +120,64 @@ export class MyElement extends LitElement {
     gl.viewport(0, 0 , canvas.width, canvas.height );
 
 
-    this.draw(gl, vertices,uTimeLoc);
+    this.draw(gl ,uTimeLoc);
 
   }
 
   updateBuffer(sampleArr){
       console.log("buffer updating..");
-      
+      // gl.uniform1f(uTimeLoc, 1 / time);
       // TODO add code to manage display
+
+      this.buffer_json = [
+        1000,
+        2000,
+        100,
+        300,
+        0,
+        0,
+        0,
+        100,
+        0,
+        200,
+        0,
+        6000,
+        0,
+        16,
+        13,
+        1020,
+        856,
+        29490,
+        30491,
+        28460,
+        28387,
+        29452,
+        29179,
+        31068,
+        28270,
+        28772,
+        30732,
+        29630,
+        27902,
+        26223,
+        31250,
+        29822,
+        23244,
+        26052,
+        24036,
+        28660,
+        27555,
+        31349,
+        4590,
+        5280,
+        29863,
+        29280,
+        12147,
+        27570,
+        25651
+    ];
+
+
   }
 
   static get properties(){
@@ -141,147 +191,36 @@ export class MyElement extends LitElement {
   }
 
   _createRects(numRects, buffer_json) {
-    this.buffer_count ++;
-
-    
     const width = 2 / numRects;
     const rects = [];
-    let x = this.x;
-    for (let i = 0; i < this.buffer_count; i++) {
-      const y = buffer_json.at(i) / (2 ** this.depth);
-      if (this.depth < ((2 ** this.depth)/2))
-      {
-        var temp = 0;
-        console.log((((((2 ** this.depth)/2)-this.depth) / (2 ** this.depth)) ) + "========" + this.depth );
-        if(y > (((((2 ** this.depth)/2)-this.depth) / (2 ** this.depth)) )){
-          temp = -(this.depth / 2 ** this.depth);
-        } else {
-          temp = -y;
-        }
-
-        rects.push(
-          // 1st triangle
-          x, y ,0,
-          x,temp ,0,
-          // x+width, y ,0,
-          // // x+width, -2 ,0,
-          // // // 2nd triangle
-          // x,temp , 0,
-          // x+width, y  ,0,
-          // x+width,temp  ,0,
-        );  
-      }
-      else{
-       
-        if(y < (this.depth / (2 ** this.depth)/2)){
-          x+= width;
-          continue;
-          
-        }
-          
-        var temp = (this.depth / (2 ** this.depth)/2);
-        console.log(temp + "=========" + y);
-        rects.push(
-          // 1st triangle
-          x,temp ,0,
-          x,y ,0,
-          // x+width,temp ,0,
-          // 2nd triangle
-          // x,y , 0,
-          // x+width,y ,0,
-          // x+width,temp  ,0,
-        );  
-      }
+    let x = -1;
+  
+    for (let i = 0; i < buffer_json.length; i++) {
+      const y = buffer_json.at(i) /(2 ** this.depth);
       // prettier-ignore
-      // rects.push(
-      //   // 1st triangle
-        // x,y ,0,
-        // x,-y ,0,
-        // x+width,y ,0,
-        // // 2nd triangle
-        // x,-y , 0,
-        // x+width,y ,0,
-        // x+width,-y  ,0,
-      // );
+      rects.push(
+        // 1st triangle
+        x,y,0,
+        x,-y,0,
+      );
       x += width;
     }
     return rects;
   }
-  // _createRects_random(numRects ) {
-  //   const width = 2 / numRects;
-  //   const rects = [];
-  //   let x = this.x;
-  //   // console.log(this.buffer_json.length);
-  //   for (let i = 0; i < numRects; i++) {
-  //     var y = Math.random();
-      
-  //     if (this.depth < (65355 /2))
-  //     {
-  //       var temp = 0;
-  //       if(y > 0.5){
-  //         temp = -0.2;
-  //       } else {
-  //         temp = -y;
-  //       }
+  
 
-  //       // console.log(temp);
-  //       rects.push(
-  //         // 1st triangle
-  //         x, y ,0,
-  //         x,temp ,0,
-  //         x+width, y ,0,
-  //         // x+width, -2 ,0,
-  //         // // 2nd triangle
-  //         x,temp , 0,
-  //         x+width, y  ,0,
-  //         x+width,temp  ,0,
-  //       );  
-  //     }
-  //     else{
-  //       var temp = 0.9;
-        
-  //       if(y < 0.9){
-  //         x += width;
-  //         continue;
-  //       }
-          
-  //       // console.log(temp);
-  //       rects.push(
-  //         // 1st triangle
-  //         x, temp ,0,
-  //         x,y ,0,
-  //         x+width, temp ,0,
-  //         // x+width, -2 ,0,
-  //         // // 2nd triangle
-  //         x,y , 0,
-  //         x+width, temp  ,0,
-  //         x+width,y  ,0,
-  //       );  
-  //     }
-      
-  //     x += width;
-  //   }
-  //   return rects;
-  // }
-
-
-  draw(gl , vertices, uTimeLoc) {
-
-    // console.log(gl.ARRAY_BUFFER);
-    // stats.begin();
+  draw(gl , uTimeLoc) {
     var time = Math.random()
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.uniform1f(uTimeLoc, 1 / time);
-    // gl.uniform1f(uCursorLoc, 1 / cursor);
-    console.log("gl---------------" + gl);
-    gl.drawArrays(gl.LINES, 0, vertices.length);
+    gl.drawArrays(gl.LINES, 0, this.buffer_json.length * 6);
     // stats.end();
     // if (this.renderLoop && this.buffer_count <= this.buffer_json.length){
     //     setTimeout(() => {
     //       requestAnimationFrame(() => this.draw());
     //     }, 10);
     // }
-    if (this.renderLoop) requestAnimationFrame(() => this.draw(gl,vertices,uTimeLoc));
+    if (this.renderLoop) requestAnimationFrame(() => this.draw(gl,uTimeLoc));
   }
 
 
