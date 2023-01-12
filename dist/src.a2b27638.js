@@ -987,7 +987,6 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
     _this = _super.call(this);
     _this.renderLoop = true;
     _this.buffer_json = [{}];
-    _this.temp_buffer = [{}];
     _this.buffer_count = 0;
     // this.renderLoop = !this.renderLoop;
     return _this;
@@ -996,7 +995,6 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
     key: "firstUpdated",
     value: function firstUpdated() {
       var canvas = this.shadowRoot.querySelector('#canvas');
-      console.log(canvas);
       var gl = canvas.getContext("webgl");
       var vertices = this._createRects(this.signal, this.buffer_json);
       // const vertices = this._createRects_random(this.signal);
@@ -1074,25 +1072,24 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
 
       // Set the view port
       gl.viewport(0, 0, canvas.width, canvas.height);
-      this.draw(gl, uTimeLoc);
     }
   }, {
     key: "updateBuffer",
     value: function updateBuffer(sampleArr) {
       console.log("buffer updating..");
-      // gl.uniform1f(uTimeLoc, 1 / time);
       // TODO add code to manage display
-
-      this.buffer_json = [1000, 2000, 100, 300, 0, 0, 0, 100, 0, 200, 0, 6000, 0, 16, 13, 1020, 856, 29490, 30491, 28460, 28387, 29452, 29179, 31068, 28270, 28772, 30732, 29630, 27902, 26223, 31250, 29822, 23244, 26052, 24036, 28660, 27555, 31349, 4590, 5280, 29863, 29280, 12147, 27570, 25651];
+      this.draw(sampleArr);
     }
   }, {
     key: "_createRects",
-    value: function _createRects(numRects, buffer_json) {
-      var width = 2 / numRects;
+    value: function _createRects(buffer_json) {
+      var width = 2 / buffer_json.length;
       var rects = [];
-      var x = -1;
+      var x = -0.9;
+      console.log(buffer_json.length);
       for (var i = 0; i < buffer_json.length; i++) {
         var y = buffer_json.at(i) / Math.pow(2, this.depth);
+        console.log(y);
         // prettier-ignore
         rects.push(
         // 1st triangle
@@ -1103,21 +1100,93 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
     }
   }, {
     key: "draw",
-    value: function draw(gl, uTimeLoc) {
-      var _this2 = this;
-      var time = Math.random();
+    value: function draw(sampleArr) {
+      var canvas = this.shadowRoot.querySelector('#canvas');
+      var gl = canvas.getContext("webgl");
+      var vertices = this._createRects(sampleArr);
+      // const vertices = this._createRects_random(this.signal);
+
+      var vertex_buffer = gl.createBuffer();
+      // Bind appropriate array buffer to it
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+      // Pass the vertex data to the buffer
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+      // Unbind the buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+      /*=================== Shaders ====================*/
+
+      // Vertex shader source code
+      var vertCode = "\n    attribute vec3 coords;\n    uniform float u_time;\n    uniform float u_cursor;\n\n    float rand (vec2 st) {\n        return fract(sin(dot(st.xy,\n                            vec2(12.9898,78.233)))*\n            43758.5453123);\n    }\n\n    void main(void) {\n      float y = coords.y * rand(vec2(u_time, abs(coords.y)));\n\n      gl_Position = vec4(\n        coords.x,\n        y,\n        0,\n        1.0\n      );\n    }\n    ";
+
+      // Create a vertex shader object
+      var vertShader = gl.createShader(gl.VERTEX_SHADER);
+
+      // Attach vertex shader source code
+      gl.shaderSource(vertShader, vertCode);
+
+      // Compile the vertex shader
+      gl.compileShader(vertShader);
+
+      // Fragment shader source code
+      var fragCode = "void main(void) {gl_FragColor = vec4(0.5,0.5,0.5,1);}";
+
+      // Create fragment shader object
+      var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+      // Attach fragment shader source code
+      gl.shaderSource(fragShader, fragCode);
+
+      // Compile the fragmentt shader
+      gl.compileShader(fragShader);
+      var shaderProgram = gl.createProgram();
+      // Attach a vertex shader
+      gl.attachShader(shaderProgram, vertShader);
+
+      // Attach a fragment shader
+      gl.attachShader(shaderProgram, fragShader);
+
+      // Link both the programs
+      gl.linkProgram(shaderProgram);
+
+      // Use the combined shader program object
+      gl.useProgram(shaderProgram);
+
+      /*======= Associating shaders to buffer objects ======*/
+
+      // Bind vertex buffer object
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+      var uTimeLoc = gl.getUniformLocation(shaderProgram, "u_time");
+      gl.uniform1f(uTimeLoc, Math.random());
+      // const uCursorLoc = gl.getUniformLocation(shaderProgram, "u_cursor");
+      // gl.uniform1f(uCursorLoc, Math.random());
+
+      // Get the attribute location
+      var coord = gl.getAttribLocation(shaderProgram, "coords");
+
+      // Point an attribute to the currently bound VBO
+      gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
+
+      // Enable the attribute
+      gl.enableVertexAttribArray(coord);
+
+      /*============ Drawing the triangle =============*/
+
+      // Enable the depth test
+      gl.enable(gl.DEPTH_TEST);
+      gl.clearColor(0, 0, 0, 1);
+
+      // Set the view port
+      gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      gl.uniform1f(uTimeLoc, 1 / time);
-      gl.drawArrays(gl.LINES, 0, this.buffer_json.length * 6);
-      // stats.end();
+      gl.drawArrays(gl.LINES, 0, sampleArr.length);
       // if (this.renderLoop && this.buffer_count <= this.buffer_json.length){
       //     setTimeout(() => {
       //       requestAnimationFrame(() => this.draw());
       //     }, 10);
       // }
-      if (this.renderLoop) requestAnimationFrame(function () {
-        return _this2.draw(gl, uTimeLoc);
-      });
+      // if (this.renderLoop) requestAnimationFrame(() => this.draw(gl,uTimeLoc));
     }
   }, {
     key: "render",
@@ -1181,7 +1250,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "18843" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65486" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

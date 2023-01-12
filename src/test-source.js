@@ -29,7 +29,7 @@ function connectStream(el){
 
         el.updateBuffer(samples);
 
-    }, intervalPeriodms);
+    }, intervalPeriodms * 5);
 
 }
 connectSampleStreamToWebGLWaveForm();
