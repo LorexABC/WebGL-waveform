@@ -1118,7 +1118,7 @@ var MyElement = /*#__PURE__*/function (_LitElement) {
       /*=================== Shaders ====================*/
 
       // Vertex shader source code
-      var vertCode = "\n    attribute vec3 coords;\n    uniform float u_time;\n    uniform float u_cursor;\n\n    float rand (vec2 st) {\n        return fract(sin(dot(st.xy,\n                            vec2(12.9898,78.233)))*\n            43758.5453123);\n    }\n\n    void main(void) {\n      float y = coords.y * rand(vec2(u_time, abs(coords.y)));\n\n      gl_Position = vec4(\n        coords.x,\n        y,\n        0,\n        1.0\n      );\n    }\n    ";
+      var vertCode = "\n    attribute vec3 coords;\n    uniform float u_time;\n    uniform float u_cursor;\n\n    void main(void) {\n\n      gl_Position = vec4(\n        coords.x,\n        coords.y,\n        0,\n        1.0\n      );\n    }\n    ";
 
       // Create a vertex shader object
       var vertShader = gl.createShader(gl.VERTEX_SHADER);
@@ -1250,7 +1250,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65486" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49942" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

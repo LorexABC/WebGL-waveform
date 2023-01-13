@@ -177,18 +177,11 @@ export class MyElement extends LitElement {
     uniform float u_time;
     uniform float u_cursor;
 
-    float rand (vec2 st) {
-        return fract(sin(dot(st.xy,
-                            vec2(12.9898,78.233)))*
-            43758.5453123);
-    }
-
     void main(void) {
-      float y = coords.y * rand(vec2(u_time, abs(coords.y)));
 
       gl_Position = vec4(
         coords.x,
-        y,
+        coords.y,
         0,
         1.0
       );
